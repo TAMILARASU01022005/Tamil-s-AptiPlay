@@ -1,0 +1,99 @@
+"use server";
+
+import { db } from "@/lib/db";
+import { COLLECTIONS, User, GameScore } from "@/lib/schema";
+
+const GAME_NAMES: Record<string, string> = {
+  "switch-challenge": "Switch Challenge",
+  "digit-challenge": "Digit Challenge",
+  "deductive-challenge": "Deductive Challenge",
+  "motion-challenge": "Motion Challenge",
+  "inductive-challenge": "Inductive Challenge",
+};
+
+export interface GameStat {
+  gameId: string;
+  gameName: string;
+  bestScore: number;
+  gamesPlayed: number;
+}
+
+export interface ProfileStats {
+  totalGamesPlayed: number;
+  totalScore: number;
+  rank: number | null;
+  gameStats: GameStat[];
+  memberSince: Date;
+}
+
+export async function getProfileStats(userId: string): Promise<ProfileStats> {
+  // All scores for this user
+  const allScores = (await db
+    .collection(COLLECTIONS.GAME_SCORES)
+    .find({ userId })
+    .toArray()) as unknown as GameScore[];
+
+  const totalGamesPlayed = allScores.length;
+
+  const bestByGame = new Map<string, number>();
+  const countByGame = new Map<string, number>();
+  for (const s of allScores) {
+    bestByGame.set(s.gameId, Math.max(s.score, bestByGame.get(s.gameId) ?? 0));
+    countByGame.set(s.gameId, (countByGame.get(s.gameId) ?? 0) + 1);
+  }
+
+  const totalScore = Array.from(bestByGame.values()).reduce((a, b) => a + b, 0);
+
+  const gameStats: GameStat[] = Array.from(bestByGame.entries()).map(
+    ([gameId, bestScore]) => ({
+      gameId,
+      gameName: GAME_NAMES[gameId] ?? gameId,
+      bestScore,
+      gamesPlayed: countByGame.get(gameId) ?? 0,
+    })
+  );
+  gameStats.sort((a, b) => b.bestScore - a.bestScore);
+
+  // Compute overall rank
+  const allBest = await db
+    .collection(COLLECTIONS.GAME_SCORES)
+    .aggregate([
+      {
+        $group: {
+          _id: { userId: "$userId", gameId: "$gameId" },
+          bestScore: { $max: "$score" },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.userId",
+          totalScore: { $sum: "$bestScore" },
+        },
+      },
+    ])
+    .toArray();
+
+  const userTotals = new Map<string, number>();
+  for (const entry of allBest) {
+    userTotals.set(entry._id, entry.totalScore ?? 0);
+  }
+
+  const myTotal = userTotals.get(userId) ?? 0;
+  let rank = 1;
+  for (const [uid, total] of userTotals) {
+    if (uid !== userId && total > myTotal) rank++;
+  }
+
+  // Member since
+  const user = (await db
+    .collection(COLLECTIONS.USERS)
+    .findOne({ id: userId })) as unknown as User | null;
+
+  return {
+    totalGamesPlayed,
+    totalScore,
+    rank: totalGamesPlayed > 0 ? rank : null,
+    gameStats,
+    memberSince: user?.createdAt ?? new Date(),
+  };
+}
