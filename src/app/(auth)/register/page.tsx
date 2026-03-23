@@ -56,10 +56,9 @@ export default function RegisterPage() {
         });
         if (result?.error) {
           toast.error("Account created but sign in failed. Please log in.");
-          router.push("/login");
+          window.location.href = "/login";
         } else {
-          router.push("/");
-          router.refresh();
+          window.location.href = "/";
         }
       } else {
         toast.error(res.error || "Registration failed");
