@@ -11,7 +11,7 @@ import { randomUUID } from "crypto";
  */
 export async function saveScore(gameId: string, score: number) {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
+    const session = await auth();
 
     if (!session) {
       return { success: false, error: "Unauthorized" };
@@ -19,7 +19,7 @@ export async function saveScore(gameId: string, score: number) {
 
     await db.collection(COLLECTIONS.GAME_SCORES).insertOne({
       id: randomUUID(),
-      userId: session.user.id,
+      userId: session?.user?.id as string,
       gameId,
       score,
       createdAt: new Date(),

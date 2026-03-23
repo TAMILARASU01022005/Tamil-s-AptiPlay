@@ -30,9 +30,7 @@ export default async function LeaderboardPage(
   const game = typeof searchParams.game === 'string' ? searchParams.game : 'overall';
 
   // Get current user
-  const session = await auth.api.getSession({
-    headers: await headers()
-  });
+  const session = await auth();
   const currentUserId = session?.user?.id;
 
   // Fetch data

@@ -11,9 +11,7 @@ export default async function HomeLayout({
 }: Readonly<{
    children: React.ReactNode;
 }>) {
-   const session = await auth.api.getSession({
-      headers: await headers()
-   });
+   const session = await auth();
    const user = session?.user ?? null;
    return (
       <UserProvider user={user}>

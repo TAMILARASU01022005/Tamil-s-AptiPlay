@@ -11,9 +11,9 @@ export const metadata: Metadata = {
 };
 
 export default async function ProfilePage() {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await auth();
 
-  if (!session) redirect("/register");
+  if (!session?.user) redirect("/register");
 
   const stats = await getProfileStats(session.user.id);
 

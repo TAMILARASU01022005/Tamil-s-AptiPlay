@@ -7,7 +7,7 @@ import { randomUUID } from "crypto";
 
 export const GET = async () => {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
+    const session = await auth();
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -29,7 +29,7 @@ export const GET = async () => {
 
 export const POST = async (req: Request) => {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
+    const session = await auth();
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
