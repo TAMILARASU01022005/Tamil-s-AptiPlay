@@ -27,7 +27,7 @@ export async function saveScore(gameId: string, score: number) {
 
     return { success: true };
   } catch (error) {
-    console.error("Failed to save score:", error);
+    console.error("SCORING: Failed to save score:", error);
     return { success: false, error: "Failed to save score" };
   }
 }

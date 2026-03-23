@@ -6,6 +6,7 @@ import Container from '@/components/common/Container';
 import GamePage from '@/components/common/GamePage';
 import Image from 'next/image';
 import confetti from 'canvas-confetti';
+import { saveScore } from '@/features/scoring/actions';
 import {
     Heart, Star, Zap, Cloud, Moon, Sun,
     Music, Anchor, Bell, Snowflake, Ghost, Gamepad2
@@ -76,6 +77,14 @@ export default function MemoryChallengePage() {
     const [streak, setStreak] = useState<number>(0);
     const [timeLeft, setTimeLeft] = useState<number>(0);
     const [highScore, setHighScore] = useState<number>(0);
+    const [isScoreSaved, setIsScoreSaved] = useState(false);
+
+    useEffect(() => {
+        if (gameState === GAME_STATES.GAME_OVER && !isScoreSaved) {
+            saveScore("memory-challenge", score);
+            setIsScoreSaved(true);
+        }
+    }, [gameState, score, isScoreSaved]);
 
     // --- Game Control ---
 
@@ -91,6 +100,7 @@ export default function MemoryChallengePage() {
         setStreak(0);
         setTimeLeft(config.time);
 
+        setIsScoreSaved(false);
         if (lvl === 1) setScore(0);
     }, []);
 

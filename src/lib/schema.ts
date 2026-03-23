@@ -13,6 +13,7 @@ export const COLLECTIONS = {
 // ── Types & Interfaces ───────────────────────────────────────────────────────
 
 export interface User {
+  _id?: string;
   id: string;
   name: string | null;
   email: string;

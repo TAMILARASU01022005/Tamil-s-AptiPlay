@@ -43,12 +43,12 @@ const MotionChallengeUI: React.FC<MotionChallengeUIProps> = ({
         setSelectedId(id);
     };
 
-    const handleMove = (id: string, dx: number, dy: number) => {
+    const handleMove = (id: string, targetX: number, targetY: number) => {
         if (isLevelWon || gameStatus !== 'playing') return;
 
-        if (isValidMove(levelDef, entities, id, dx, dy)) {
+        if (isValidMove(levelDef, entities, id, targetX, targetY)) {
             const newEntities = entities.map((e) =>
-                e.id === id ? { ...e, x: e.x + dx, y: e.y + dy } : e
+                e.id === id ? { ...e, x: targetX, y: targetY } : e
             );
 
             setEntities(newEntities);

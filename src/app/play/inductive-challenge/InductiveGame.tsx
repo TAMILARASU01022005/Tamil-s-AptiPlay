@@ -9,7 +9,7 @@ import { formatTime } from "@/lib/gameUtils";
 import { saveScore } from "@/features/scoring/actions";
 
 const TIME_PER_QUESTION = 30;
-const SESSION_TIME = 180;
+const SESSION_TIME = 10;
 
 export default function InductiveGame() {
   const [level, setLevel] = useState(1);

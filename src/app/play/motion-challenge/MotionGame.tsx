@@ -7,7 +7,7 @@ import MotionChallengeUI from "@/components/games/MotionChallenge/MotionChalleng
 import { formatTime } from "@/lib/gameUtils";
 import { saveScore } from "@/features/scoring/actions";
 
-const SESSION_TIME = 240;
+const SESSION_TIME = 10;
 
 export default function MotionGame() {
   const [level, setLevel] = useState(1);

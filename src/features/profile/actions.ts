@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { COLLECTIONS, User, GameScore } from "@/lib/schema";
+import { ObjectId } from "mongodb";
 
 const GAME_NAMES: Record<string, string> = {
   "switch-challenge": "Switch Challenge",
@@ -87,7 +88,7 @@ export async function getProfileStats(userId: string): Promise<ProfileStats> {
   // Member since
   const user = (await db
     .collection(COLLECTIONS.USERS)
-    .findOne({ id: userId })) as unknown as User | null;
+    .findOne({ _id: new ObjectId(userId) })) as unknown as User | null;
 
   return {
     totalGamesPlayed,

@@ -7,6 +7,7 @@ import Container from "@/components/common/Container";
 import MemoryChallengeFirstUI from "@/components/memory-games/RecallChallengeFirstUI";
 import Image from "next/image";
 import confetti from "canvas-confetti";
+import { saveScore } from "@/features/scoring/actions";
 import { ColorItem, generateLevelColors, LEVELS, pickTargetColor } from "./gameLogic";
 
 /* ------------------------------------------------------------------ */
@@ -33,6 +34,14 @@ export default function MemoryChallengeFirstPage() {
     const [memoTimeLeft, setMemoTimeLeft] = useState(0);
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+    const [isScoreSaved, setIsScoreSaved] = useState(false);
+
+    useEffect(() => {
+        if (gameState === "game_over" && !isScoreSaved) {
+            saveScore("recall-challenge", score);
+            setIsScoreSaved(true);
+        }
+    }, [gameState, score, isScoreSaved]);
 
     const currentConfig =
         LEVELS.find(l => l.level === level) ?? LEVELS[0];
@@ -62,6 +71,7 @@ export default function MemoryChallengeFirstPage() {
         setScore(0);
         setStreak(0);
         setLives(3);
+        setIsScoreSaved(false);
         startLevel(1);
     }, [startLevel]);
 

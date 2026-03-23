@@ -3,10 +3,12 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { mongoClient, db } from "./db";
 
 export const auth = betterAuth({
-  database: mongodbAdapter(db, {
+  database: mongodbAdapter(mongoClient.db("aptitude1"), {
+    mongoClient,
     // Disable transactions for MongoDB Atlas free tier (no replica set required)
     transaction: false,
   }),
+  baseURL: process.env.BETTER_AUTH_URL,
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
@@ -18,6 +20,7 @@ export const auth = betterAuth({
   },
   trustedOrigins: [
     "https://tamil-s-aptiplay.onrender.com",
+    "http://localhost:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",

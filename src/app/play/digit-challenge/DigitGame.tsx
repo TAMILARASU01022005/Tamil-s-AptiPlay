@@ -9,7 +9,7 @@ import { saveScore } from "@/features/scoring/actions";
 import Image from "next/image";
 
 const TIME_PER_QUESTION = 30;
-const SESSION_TIME = 180;
+const SESSION_TIME = 10;
 const MAX_WRONG = 3;
 
 export default function DigitGame() {

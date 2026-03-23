@@ -5,6 +5,7 @@ import { useState } from "react";
 import StartScreen from "./StartScreen";
 import QuizScreen from "./QuizScreen";
 import ResultScreen from "./ResultScreen";
+import { saveScore } from "@/features/scoring/actions";
 import { AnimatePresence, motion } from "framer-motion";
 import { authClient } from "@/lib/auth-client";
 import { Loader2, LockKeyhole } from "lucide-react";
@@ -26,6 +27,7 @@ export default function IQTestContainer() {
     const handleFinish = (resultsData: any) => {
         setResults(resultsData);
         setViewState('result');
+        saveScore("iq-test", resultsData.iq);
     };
 
     const handleRetry = () => {

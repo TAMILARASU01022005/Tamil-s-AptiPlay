@@ -49,36 +49,43 @@ export function isValidMove(
     level: LevelDef,
     entities: Entity[],
     entityId: string,
-    dx: number,
-    dy: number
+    targetX: number,
+    targetY: number
 ): boolean {
-    if (dx === 0 && dy === 0) return false;
-
     const entity = entities.find((e) => e.id === entityId);
     if (!entity) return false;
     if (entity.type === 'obstacle') return false;
 
-    const newX = entity.x + dx;
-    const newY = entity.y + dy;
+    // Must move in a straight line (horizontal or vertical)
+    const isHorizontal = entity.y === targetY;
+    const isVertical = entity.x === targetX;
+
+    if (!isHorizontal && !isVertical) return false;
+    if (entity.x === targetX && entity.y === targetY) return false;
 
     // Boundary check
     if (
-        newX < 0 ||
-        newY < 0 ||
-        newX + entity.w > level.cols ||
-        newY + entity.h > level.rows
+        targetX < 0 ||
+        targetY < 0 ||
+        targetX + entity.w > level.cols ||
+        targetY + entity.h > level.rows
     ) {
         return false;
     }
 
     const grid = getGridCache(level, entities);
 
-    // Collision check
-    for (let r = newY; r < newY + entity.h; r++) {
-        for (let c = newX; c < newX + entity.w; c++) {
-            const cell = grid[r][c];
-            // Valid if cell is empty or occupied by THE SAME entity
-            if (cell !== '' && cell !== entity.id) {
+    // Path check: Check every cell between current and target
+    const startX = Math.min(entity.x, targetX);
+    const endX = Math.max(entity.x, targetX);
+    const startY = Math.min(entity.y, targetY);
+    const endY = Math.max(entity.y, targetY);
+
+    for (let r = startY; r < endY + entity.h; r++) {
+        for (let c = startX; c < endX + entity.w; c++) {
+            const cellId = grid[r][c];
+            // Cell must be either empty or occupied by THE SAME entity
+            if (cellId !== '' && cellId !== entity.id) {
                 return false;
             }
         }
@@ -87,18 +94,6 @@ export function isValidMove(
     return true;
 }
 
-export function getValidMoves(
-    level: LevelDef,
-    entities: Entity[],
-    entityId: string
-): Record<string, boolean> {
-    return {
-        up: isValidMove(level, entities, entityId, 0, -1),
-        down: isValidMove(level, entities, entityId, 0, 1),
-        left: isValidMove(level, entities, entityId, -1, 0),
-        right: isValidMove(level, entities, entityId, 1, 0),
-    };
-}
 
 export function checkWinPattern(level: LevelDef, entities: Entity[]): boolean {
     const ball = entities.find((e) => e.type === 'ball');

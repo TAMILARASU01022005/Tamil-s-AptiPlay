@@ -9,7 +9,7 @@ import { saveScore } from "@/features/scoring/actions";
 import Image from "next/image";
 
 const TIME_PER_QUESTION = 20;
-const SESSION_TIME = 180;
+const SESSION_TIME = 10;
 
 export default function DeductiveGame() {
   const [level, setLevel] = useState<number>(1);
