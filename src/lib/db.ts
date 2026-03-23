@@ -1,26 +1,39 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, ServerApiVersion } from "mongodb";
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
 }
 
 const uri = process.env.MONGODB_URI;
-const options = { serverSelectionTimeoutMS: 30000 };
-
-// Create a single MongoClient instance shared across the application.
-// In development, preserve it across hot-reloads with a global variable.
-const globalWithMongo = global as typeof globalThis & {
-  _mongoClient?: MongoClient;
+const options = {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
 };
 
-if (!globalWithMongo._mongoClient) {
-  globalWithMongo._mongoClient = new MongoClient(uri, options);
+let client: MongoClient;
+let clientPromise: Promise<MongoClient>;
+
+if (process.env.NODE_ENV === "development") {
+  let globalWithMongo = global as typeof globalThis & {
+    _mongoClientPromise?: Promise<MongoClient>;
+    _mongoClient?: MongoClient;
+  };
+
+  if (!globalWithMongo._mongoClientPromise) {
+    client = new MongoClient(uri, options);
+    globalWithMongo._mongoClient = client;
+    globalWithMongo._mongoClientPromise = client.connect();
+  }
+  clientPromise = globalWithMongo._mongoClientPromise;
+  client = globalWithMongo._mongoClient!;
+} else {
+  client = new MongoClient(uri, options);
+  clientPromise = client.connect();
 }
 
-export const mongoClient = globalWithMongo._mongoClient;
-
-// Export the default database. The MongoDB driver auto-connects on first use.
-export const db = mongoClient.db();
-
-// clientPromise for any code that explicitly awaits a connected client
-export default mongoClient.connect().catch(() => mongoClient);
+export default clientPromise;
+export const mongoClient = client;
+export const db = client.db();

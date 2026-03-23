@@ -1,42 +1,25 @@
-import { betterAuth } from "better-auth";
-import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { mongoClient, db } from "./db";
+import NextAuth from "next-auth";
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import clientPromise from "./db";
+import Google from "next-auth/providers/google";
 
-export const auth = betterAuth({
-  database: mongodbAdapter(mongoClient.db("aptitude1"), {
-    mongoClient,
-    // Disable transactions for MongoDB Atlas free tier (no replica set required)
-    transaction: false,
-  }),
-  baseURL: process.env.BETTER_AUTH_URL,
-  emailAndPassword: {
-    enabled: true,
-    autoSignIn: true,
-    minPasswordLength: 6,
-  },
-  session: {
-    expiresIn: 60 * 60 * 24 * 30, // 30 days
-    updateAge: 60 * 60 * 24, // 1 day
-  },
-  trustedOrigins: [
-    "https://tamil-s-aptiplay.onrender.com",
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:3001",
-    "http://10.0.2.2:3000",
-    "http://10.0.2.2:3001",
-    "http://localhost:8081",
-    "games-apti://",
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: MongoDBAdapter(clientPromise),
+  providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
   ],
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+  callbacks: {
+    async session({ session, user }) {
+      if (session.user) {
+        session.user.id = user.id;
+      }
+      return session;
     },
   },
-  rateLimit: {
-    window: 60,
-    max: 10,
+  pages: {
+    signIn: "/auth/signin",
   },
 });
