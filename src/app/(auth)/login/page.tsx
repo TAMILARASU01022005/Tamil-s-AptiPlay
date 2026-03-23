@@ -1,5 +1,7 @@
 "use client";
 
+import { loginSchema, LoginValues } from "@/lib/auth-schemas";
+import { signIn } from "next-auth/react";
 import { signInWithGoogle } from "@/features/auth/client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -7,7 +9,6 @@ import { type JSX, type SVGProps, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { signInFormSchema } from "@/lib/auth-schema";
 import {
   Form,
   FormControl,
@@ -17,7 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -35,38 +35,35 @@ export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof signInFormSchema>>({
-    resolver: zodResolver(signInFormSchema),
+  const form = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof signInFormSchema>) {
+  async function onSubmit(values: LoginValues) {
     setLoading(true);
-    const { email, password } = values;
-    await authClient.signIn.email(
-      {
-        email,
-        password,
-      },
-      {
-        onRequest: () => {
-          setLoading(true);
-        },
-        onSuccess: () => {
-          toast.success("Logged in successfully");
-          router.push("/");
-          router.refresh();
-          setLoading(false);
-        },
-        onError: (ctx) => {
-          toast.error(ctx.error.message);
-          setLoading(false);
-        },
+    try {
+      const res = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        toast.error("Invalid email or password");
+      } else {
+        toast.success("Logged in successfully");
+        router.push("/");
+        router.refresh();
       }
-    );
+    } catch (error) {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

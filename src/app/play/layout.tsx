@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { UserProvider } from "@/context/UserContext";
 import Header from "@/components/common/Header";
+import type { User } from "@/types/user";
 
 // Gameplay pages are not SEO targets — the /games/* pages are.
 // noindex prevents Google from indexing auth-gated gameplay URLs.
@@ -22,7 +22,7 @@ export default async function DashboardLayout({
     return redirect("/register");
   }
 
-  const user = session?.user;
+  const user = (session?.user as User) ?? null;
   
   return (
     <UserProvider user={user}>

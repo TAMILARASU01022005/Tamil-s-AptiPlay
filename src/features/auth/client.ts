@@ -1,7 +1,5 @@
-import { authClient } from "@/lib/auth-client";
+import { signIn } from "next-auth/react";
 
 export const signInWithGoogle = async () => {
-    await authClient.signIn.social({
-        provider: "google",
-    });
+    await signIn("google");
 };

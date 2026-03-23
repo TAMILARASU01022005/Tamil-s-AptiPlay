@@ -1,5 +1,8 @@
 "use client";
 
+import { registerSchema, RegisterValues } from "@/lib/auth-schemas";
+import { registerUser } from "@/features/auth/actions";
+import { signIn } from "next-auth/react";
 import { signInWithGoogle } from "@/features/auth/client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -7,7 +10,6 @@ import { type JSX, type SVGProps, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { formSchema } from "@/lib/auth-schema";
 import {
   Form,
   FormControl,
@@ -17,7 +19,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -33,8 +34,8 @@ export default function RegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -42,30 +43,32 @@ export default function RegisterPage() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: RegisterValues) {
     setLoading(true);
-    const { name, email, password } = values;
-    await authClient.signUp.email(
-      {
-        email,
-        password,
-        name,
-      },
-      {
-        onRequest: () => {
-          setLoading(true);
-        },
-        onSuccess: () => {
-          toast.success("Account created successfully");
+    try {
+      const res = await registerUser(values);
+      if (res.status) {
+        toast.success("Account created! Signing you in...");
+        const result = await signIn("credentials", {
+          email: values.email,
+          password: values.password,
+          redirect: false,
+        });
+        if (result?.error) {
+          toast.error("Account created but sign in failed. Please log in.");
+          router.push("/login");
+        } else {
           router.push("/");
-          setLoading(false);
-        },
-        onError: (ctx) => {
-          toast.error(ctx.error.message);
-          setLoading(false);
-        },
+          router.refresh();
+        }
+      } else {
+        toast.error(res.error || "Registration failed");
       }
-    );
+    } catch (error) {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

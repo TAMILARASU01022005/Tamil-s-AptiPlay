@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 import { getProfileStats } from "@/features/profile/actions";
 import ProfileClient from "./ProfileClient";
+import type { User } from "@/types/user";
 
 export const metadata: Metadata = {
   title: "My Profile",
@@ -15,7 +15,7 @@ export default async function ProfilePage() {
 
   if (!session?.user) redirect("/register");
 
-  const stats = await getProfileStats(session.user.id);
+  const stats = await getProfileStats(session.user.id ?? "");
 
-  return <ProfileClient user={session.user} stats={stats} />;
+  return <ProfileClient user={session.user as User} stats={stats} />;
 }

@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "games.nishul.dev" },
       { protocol: "https", hostname: "www.nishul.dev" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "*.googleusercontent.com" },
+      { protocol: "https", hostname: "avatars.githubusercontent.com" },
     ],
     formats: ["image/webp", "image/avif"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],

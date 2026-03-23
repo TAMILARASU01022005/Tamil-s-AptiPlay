@@ -15,7 +15,7 @@ export const GET = async () => {
 
     const scores = (await db
       .collection(COLLECTIONS.GAME_SCORES)
-      .find({ userId: session.user.id })
+      .find({ userId: session.user?.id })
       .sort({ score: -1 })
       .limit(10)
       .toArray()) as unknown as GameScore[];
@@ -44,7 +44,7 @@ export const POST = async (req: Request) => {
 
     const newScore: GameScore = {
       id: randomUUID(),
-      userId: session.user.id,
+      userId: session.user?.id ?? "",
       gameId,
       score,
       createdAt: new Date(),

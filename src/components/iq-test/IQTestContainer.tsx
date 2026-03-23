@@ -7,7 +7,7 @@ import QuizScreen from "./QuizScreen";
 import ResultScreen from "./ResultScreen";
 import { saveScore } from "@/features/scoring/actions";
 import { AnimatePresence, motion } from "framer-motion";
-import { authClient } from "@/lib/auth-client";
+import { useSession } from "next-auth/react";
 import { Loader2, LockKeyhole } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
@@ -18,7 +18,8 @@ export default function IQTestContainer() {
     const [viewState, setViewState] = useState<ViewState>('start');
     const [results, setResults] = useState<any>(null);
 
-    const { data: session, isPending } = authClient.useSession();
+    const { data: session, status } = useSession();
+    const isPending = status === "loading";
 
     const handleStart = () => {
         setViewState('playing');
