@@ -5,6 +5,7 @@ import "./globals.css";
 import Script from "next/script";
 import { siteConfig } from "@/config/site";
 import { DotPattern } from "@/components/ui/dot-pattern";
+import { Providers } from "./providers";
 
 // Lazy load heavy components
 
@@ -183,9 +184,11 @@ export default function RootLayout({
           ></div>
         </div>
 
-        <ReactLenis root>
-          <main>{children}</main>
-        </ReactLenis>
+        <Providers>
+          <ReactLenis root>
+            <main>{children}</main>
+          </ReactLenis>
+        </Providers>
       </body>
     </html>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import IQTestContainer from "@/components/iq-test/IQTestContainer";
 import BackToDashboard from "@/components/common/BackToDashboard";
 import { motion } from "framer-motion";
