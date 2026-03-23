@@ -7,7 +7,11 @@ import bcrypt from "bcryptjs";
 import { db } from "./db";
 import { COLLECTIONS } from "./schema";
 
+// Reuse BETTER_AUTH_SECRET if AUTH_SECRET is not explicitly set
+const secret = process.env.AUTH_SECRET ?? process.env.BETTER_AUTH_SECRET;
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret,
   adapter: MongoDBAdapter(clientPromise),
   trustHost: true,
   session: {
