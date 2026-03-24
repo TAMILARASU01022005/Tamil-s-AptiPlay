@@ -54,6 +54,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Fix: Render uses internal port 10000, so NextAuth generates localhost:10000 URLs.
+      // Always rewrite the URL to use the real public base URL.
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      try {
+        const redirectUrl = new URL(url);
+        const base = new URL(baseUrl);
+        // If the host is wrong (e.g. localhost:10000), replace it with the correct host
+        if (redirectUrl.host !== base.host) {
+          redirectUrl.host = base.host;
+          redirectUrl.port = "";
+          redirectUrl.protocol = base.protocol;
+          return redirectUrl.toString();
+        }
+      } catch {}
+      return baseUrl;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
