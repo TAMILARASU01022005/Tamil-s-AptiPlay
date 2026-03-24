@@ -7,6 +7,13 @@ import bcrypt from "bcryptjs";
 import { db } from "./db";
 import { COLLECTIONS } from "./schema";
 
+// Render automatically exposes RENDER_EXTERNAL_URL (e.g. https://tamil-s-aptiplay.onrender.com).
+// Set it as NEXTAUTH_URL / AUTH_URL before NextAuth initialises so it never falls back to localhost.
+if (process.env.RENDER_EXTERNAL_URL) {
+  process.env.NEXTAUTH_URL = process.env.RENDER_EXTERNAL_URL;
+  process.env.AUTH_URL = process.env.RENDER_EXTERNAL_URL;
+}
+
 // Reuse BETTER_AUTH_SECRET if AUTH_SECRET is not explicitly set
 const secret = process.env.AUTH_SECRET ?? process.env.BETTER_AUTH_SECRET;
 

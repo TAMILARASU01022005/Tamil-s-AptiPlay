@@ -5,10 +5,9 @@ import { signIn } from "next-auth/react";
 import { signInWithGoogle } from "@/features/auth/client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { type JSX, type SVGProps, useState } from "react";
+import { type JSX, type SVGProps, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import {
   Form,
   FormControl,
@@ -19,7 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 // Google Icon
@@ -33,7 +32,16 @@ const GoogleIcon = (
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
+
+  // Show error from URL if NextAuth redirected back with ?error=
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error) {
+      toast.error("Invalid email or password. Please try again.");
+    }
+  }, [searchParams]);
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -46,14 +54,22 @@ export default function LoginPage() {
   async function onSubmit(values: LoginValues) {
     setLoading(true);
     try {
-      await signIn("credentials", {
+      const res = await signIn("credentials", {
         email: values.email,
         password: values.password,
-        callbackUrl: "/",
+        redirect: false,
       });
-    } catch (error: any) {
-      // signIn throws on failure when redirect:true
-      toast.error("Invalid email or password");
+
+      if (!res || !res.ok) {
+        toast.error("Invalid email or password");
+        setLoading(false);
+      } else {
+        toast.success("Logged in successfully");
+        // Hard reload so server components re-read the fresh session cookie
+        window.location.href = "/";
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.");
       setLoading(false);
     }
   }
