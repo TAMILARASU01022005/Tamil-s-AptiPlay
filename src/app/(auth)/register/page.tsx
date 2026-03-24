@@ -49,23 +49,17 @@ export default function RegisterPage() {
       const res = await registerUser(values);
       if (res.status) {
         toast.success("Account created! Signing you in...");
-        const result = await signIn("credentials", {
+        await signIn("credentials", {
           email: values.email,
           password: values.password,
-          redirect: false,
+          callbackUrl: "/",
         });
-        if (result?.error) {
-          toast.error("Account created but sign in failed. Please log in.");
-          window.location.href = "/login";
-        } else {
-          window.location.href = "/";
-        }
       } else {
         toast.error(res.error || "Registration failed");
+        setLoading(false);
       }
     } catch (error) {
       toast.error("Something went wrong");
-    } finally {
       setLoading(false);
     }
   }

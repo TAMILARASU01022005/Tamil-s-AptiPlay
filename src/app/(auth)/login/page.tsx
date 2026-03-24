@@ -46,21 +46,14 @@ export default function LoginPage() {
   async function onSubmit(values: LoginValues) {
     setLoading(true);
     try {
-      const res = await signIn("credentials", {
+      await signIn("credentials", {
         email: values.email,
         password: values.password,
-        redirect: false,
+        callbackUrl: "/",
       });
-
-      if (res?.error) {
-        toast.error("Invalid email or password");
-      } else {
-        toast.success("Logged in successfully");
-        window.location.href = "/";
-      }
-    } catch (error) {
-      toast.error("Something went wrong");
-    } finally {
+    } catch (error: any) {
+      // signIn throws on failure when redirect:true
+      toast.error("Invalid email or password");
       setLoading(false);
     }
   }
